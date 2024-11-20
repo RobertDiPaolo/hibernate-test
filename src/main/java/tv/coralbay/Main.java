@@ -72,22 +72,6 @@ public class Main
             session.persist(level1_1_1_2);
         });
 
-        // do an hql lookup
-        sessionFactory.inTransaction(session -> {
-            var query = session.createQuery(
-                    """
-                        SELECT t
-                        FROM TreeEntity t
-                        JOIN FETCH t.children c
-                        JOIN FETCH c.children
-                        WHERE t.value = 'root'
-                        """, TestEntity.class)
-                    .setTimeout(10);
-            var item = query.list();
-
-            System.out.println("Retrieved HQL items: " + item);
-        });
-
         // do a native sql lookup
         sessionFactory.inTransaction(session -> {
             var query = session.createNativeQuery(
@@ -96,9 +80,9 @@ public class Main
                         FROM tree t
                         INNER JOIN tree t2 ON t2.parentident = t.ident
                         INNER JOIN tree t3 ON t3.parentident = t2.ident
-                        WHERE value = 'root'
+                        WHERE t.value = 'root'
                         """)
-                    .addEntity("t", TestEntity.class)
+                    .addEntity("t", TreeEntity.class)
                     .addJoin("t2", "t.children")
                     .addJoin("t3", "t2.children")
                     .setTimeout(10);
