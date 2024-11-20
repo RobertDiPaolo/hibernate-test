@@ -13,6 +13,8 @@ public class Main
 
     public static void main(String[] args)
     {
+        System.out.println("Hibernate version: " + org.hibernate.Version.getVersionString());
+
         hibernateSetup();
 
         testBasicNativeQuery();
