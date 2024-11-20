@@ -1,0 +1,22 @@
+version: '2.1'
+
+volumes:
+  dbData:
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: hibernate-test
+      PGDATA: /media/postgresql/data
+    ports:
+      - 5432:5432
+    volumes:
+      - dbData:/media/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d hibernate-test"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
