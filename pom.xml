@@ -22,11 +22,10 @@
             <version>42.7.4</version>
         </dependency>
 
-        <!-- Upgraded to version -->
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
+            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.6.2.Final</version>
+            <version>5.6.15.Final</version>
         </dependency>
 
     </dependencies>
