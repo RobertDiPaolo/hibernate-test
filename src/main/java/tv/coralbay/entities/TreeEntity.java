@@ -80,17 +80,22 @@ public class TreeEntity
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
         TreeEntity that = (TreeEntity) o;
-        return ident == that.ident && Objects.equals(value, that.value) && Objects.equals(parent,
-                that.parent) && Objects.equals(children, that.children);
+        return ident == that.ident && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(value, parent, children, ident);
+        return Objects.hash(value, ident);
     }
 
     @Override
@@ -98,8 +103,6 @@ public class TreeEntity
     {
         return "TreeEntity{" +
                "value='" + value + '\'' +
-               ", parent=" + parent +
-               ", children=" + children +
                ", ident=" + ident +
                '}';
     }
