@@ -8,6 +8,36 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tree")
+// Explicit result set mapping, we have to reference all the columns, etc manually :(
+@SqlResultSetMapping(
+    name = "TreeHierarchyMapping",
+    entities = {
+        @EntityResult(
+            entityClass = TreeEntity.class,
+            fields = {
+                @FieldResult(name = "ident", column = "t_ident"),
+                @FieldResult(name = "value", column = "t_value"),
+                @FieldResult(name = "parent", column = "t_parentident")
+            }
+        ),
+        @EntityResult(
+            entityClass = TreeEntity.class,
+            fields = {
+                @FieldResult(name = "ident", column = "t2_ident"),
+                @FieldResult(name = "value", column = "t2_value"),
+                @FieldResult(name = "parent", column = "t2_parentident")
+            }
+        ),
+        @EntityResult(
+            entityClass = TreeEntity.class,
+            fields = {
+                @FieldResult(name = "ident", column = "t3_ident"),
+                @FieldResult(name = "value", column = "t3_value"),
+                @FieldResult(name = "parent", column = "t3_parentident")
+            }
+        )
+    }
+)
 public class TreeEntity
 {
     private String value;

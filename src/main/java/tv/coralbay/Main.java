@@ -19,8 +19,11 @@ public class Main
 
         testBasicNativeQuery();
 
-        testTreeQueries();
+        // this works, but is a lot more finger work
+        testTreeQueriesResultMapping();
 
+        // this doesn't work
+        testTreeQueries();
     }
 
     protected static void testBasicNativeQuery()
@@ -34,9 +37,9 @@ public class Main
         // do a native sql lookup
         sessionFactory.inTransaction(session -> {
             var query = session.createNativeQuery(
-                    """
-                        SELECT {t.*} FROM testentity t WHERE value2 = :param1
-                        """)
+                            """
+                                    SELECT {t.*} FROM testentity t WHERE value2 = :param1
+                                    """)
                     .setParameter("param1", "a")
                     .addEntity("t", TestEntity.class)
                     .setTimeout(10);
@@ -77,16 +80,66 @@ public class Main
         // do a native sql lookup
         sessionFactory.inTransaction(session -> {
             var query = session.createNativeQuery(
-                    """
-                        SELECT {t.*}, {t2.*}, {t3.*}
-                        FROM tree t
-                        INNER JOIN tree t2 ON t2.parentident = t.ident
-                        INNER JOIN tree t3 ON t3.parentident = t2.ident
-                        WHERE t.value = 'root'
-                        """)
+                            """
+                                    SELECT {t.*}, {t2.*}, {t3.*}
+                                    FROM tree t
+                                    INNER JOIN tree t2 ON t2.parentident = t.ident
+                                    INNER JOIN tree t3 ON t3.parentident = t2.ident
+                                    WHERE t.value = 'root'
+                                    """)
                     .addEntity("t", TreeEntity.class)
                     .addJoin("t2", "t.children")
                     .addJoin("t3", "t2.children")
+                    .setTimeout(10);
+            var item = query.list();
+
+            System.out.println("Retrieved SQL items: " + item);
+        });
+    }
+
+    protected static void testTreeQueriesResultMapping()
+    {
+        // Build a basic tree with 4 layers
+        sessionFactory.inTransaction(session -> {
+            var root = new TreeEntity("root", null, null);
+            session.persist(root);
+
+            var level1_1 = new TreeEntity("level1_1", root, null);
+            session.persist(level1_1);
+            var level1_2 = new TreeEntity("level1_2", root, null);
+            session.persist(level1_2);
+
+            var level1_1_1 = new TreeEntity("level1_1_1", level1_1, null);
+            session.persist(level1_1_1);
+            var level1_1_2 = new TreeEntity("level1_1_2", level1_1, null);
+            session.persist(level1_1_2);
+
+            var level1_2_1 = new TreeEntity("level1_2_1", level1_2, null);
+            session.persist(level1_2_1);
+            var level1_2_2 = new TreeEntity("level1_2_2", level1_2, null);
+            session.persist(level1_2_2);
+
+            var level1_1_1_1 = new TreeEntity("level1_1_1_1", level1_1, null);
+            session.persist(level1_1_1_1);
+            var level1_1_1_2 = new TreeEntity("level1_1_1_2", level1_1, null);
+            session.persist(level1_1_1_2);
+        });
+
+        // do a native sql lookup
+        sessionFactory.inTransaction(session -> {
+            var query = session.createNativeQuery(
+                            // Here we have to deconstruct all the fields manually we can't use the {} notation
+                            // as that's broken :(
+                            """
+                                    SELECT t.ident AS t_ident, t.value AS t_value, t.parentident AS t_parentident,
+                                           t2.ident AS t2_ident, t2.value AS t2_value, t2.parentident AS t2_parentident,
+                                           t3.ident AS t3_ident, t3.value AS t3_value, t3.parentident AS t3_parentident
+                                    FROM tree t
+                                    INNER JOIN tree t2 ON t2.parentident = t.ident
+                                    INNER JOIN tree t3 ON t3.parentident = t2.ident
+                                    WHERE t.value = 'root'
+                                    """,
+                            "TreeHierarchyMapping")
                     .setTimeout(10);
             var item = query.list();
 
